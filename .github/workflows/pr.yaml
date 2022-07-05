@@ -126,6 +126,11 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
           check-latest: true
+      - name: Install Helm client
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.9.0
+        id: install
       - name: Download Maven Repo
         uses: actions/download-artifact@v1
         with:
@@ -146,7 +151,7 @@ jobs:
           chmod +x ./quarkus-dev-cli
       - name: Build in JVM mode
         run: |
-          mvn -B -fae -s .github/mvn-settings.xml clean install -Pframework,examples,extensions -Drun-cli-tests -Dts.quarkus.cli.cmd="${PWD}/quarkus-dev-cli" -Dquarkus.platform.version="${{ matrix.quarkus-version }}"
+          mvn -B -fae -s .github/mvn-settings.xml clean install -Pframework,examples,extensions -Drun-cli-tests -Drun-helm-tests -Dts.quarkus.cli.cmd="${PWD}/quarkus-dev-cli" -Dquarkus.platform.version="${{ matrix.quarkus-version }}"
       - name: Zip Artifacts
         run: |
           zip -R artifacts-latest-linux-jvm${{ matrix.java }}.zip '*-reports/*'
