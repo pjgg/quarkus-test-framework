@@ -1,12 +1,19 @@
 package io.quarkus.test.bootstrap;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.yaml.snakeyaml.Yaml;
 
 import io.quarkus.test.configuration.PropertyLookup;
 import io.quarkus.test.logging.FileLoggingHandler;
@@ -28,6 +35,7 @@ public class QuarkusHelmClient {
     private static final int EXPECTED_CHART_FIELDS_AMOUNT = 5;
 
     private final ScenarioContext context;
+    private Yaml yaml = new Yaml();
 
     public QuarkusHelmClient(ScenarioContext ctx) {
         this.context = ctx;
@@ -48,6 +56,28 @@ public class QuarkusHelmClient {
 
     public Result installChart(String chartName, String chartFolderPath) {
         return runCliAndWait("install", chartName, chartFolderPath);
+    }
+
+    public Result installChart(String chartName, String chartFolderPath, Duration timeoutSec, String readinessPath) {
+        return runCliAndWait("install",
+                chartName,
+                chartFolderPath,
+                "--wait",
+                "--timeout ", timeoutSec.getSeconds() + "s",
+                "--set", "readinessPath=" + readinessPath);
+    }
+
+    public Result updateChart(String chartName, String chartFolderPath) {
+        return runCliAndWait("update", chartName, chartFolderPath);
+    }
+
+    public Result updateChart(String chartName, String chartFolderPath, Duration timeoutSec, String readinessPath) {
+        return runCliAndWait("update",
+                chartName,
+                chartFolderPath,
+                "--wait",
+                "--timeout ", timeoutSec.getSeconds() + "s",
+                "--set", "readinessPath=" + readinessPath);
     }
 
     public Result uninstallChart(String chartName) {
@@ -77,6 +107,11 @@ public class QuarkusHelmClient {
             }
         }
         return chartList;
+    }
+
+    public Map<String, Object> getChartValues(String chartName, String chartFolderPath) throws FileNotFoundException {
+        InputStream inputStream = new FileInputStream(chartFolderPath + "/values.yaml");
+        return yaml.load(inputStream);
     }
 
     private Result runCliAndWait(String... args) {

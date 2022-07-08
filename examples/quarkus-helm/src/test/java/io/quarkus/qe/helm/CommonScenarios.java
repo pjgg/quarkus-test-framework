@@ -1,7 +1,7 @@
 package io.quarkus.qe.helm;
 
-import static io.netty.util.internal.SystemPropertyUtil.contains;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItemInArray;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,7 +18,24 @@ public abstract class CommonScenarios {
     protected abstract QuarkusHelmClient getHelmClient();
 
     @Test
-    public void shouldInstallHelmChartManually() {
+    public void shouldInstallQuarkusAppThroughHelm() {
+        QuarkusHelmClient helmClient = getHelmClient();
+        String chartName = "examples-quarkus-helm";
+        String chartFolderName = helmClient.getWorkingDirectory().getAbsolutePath() + "/helm/" + chartName;
+        QuarkusHelmClient.Result chartResultCmd = helmClient.installChart(chartName, chartFolderName);
+        thenSucceed(chartResultCmd);
+
+        List<QuarkusHelmClient.ChartListResult> charts = helmClient.getCharts();
+        assertTrue(charts.size() > 0, "Chart " + chartName + " not found. Installation fail");
+        List<String> chartNames = charts.stream()
+                .map(QuarkusHelmClient.ChartListResult::getName)
+                .map(String::trim)
+                .collect(Collectors.toList());
+        assertThat(chartNames.toArray(), hasItemInArray(chartName));
+    }
+
+    @Test
+    public void shouldInstallNewEmptyHelmChartManually() {
         QuarkusHelmClient helmClient = getHelmClient();
         String chartName = "mychart-manually";
         String chartFolderName = helmClient.getWorkingDirectory().getAbsolutePath() + "/" + chartName;
@@ -30,7 +47,7 @@ public abstract class CommonScenarios {
     }
 
     @Test
-    public void shouldInstallHelmChartWithShortcuts() {
+    public void shouldInstallNewEmptyHelmChartWithShortcuts() {
         QuarkusHelmClient helmClient = getHelmClient();
         String chartName = "mychart-shortcuts";
         QuarkusHelmClient.NewChartResult newChartResult = helmClient.createEmptyChart(chartName);

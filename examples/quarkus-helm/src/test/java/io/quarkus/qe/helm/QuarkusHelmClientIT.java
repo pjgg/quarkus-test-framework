@@ -1,8 +1,12 @@
 package io.quarkus.qe.helm;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.FileNotFoundException;
+import java.util.Map;
+
 import javax.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +20,7 @@ import io.quarkus.test.scenarios.annotations.DisabledOnQuarkusVersion;
 public class QuarkusHelmClientIT {
 
     private final static String EXPECTED_HELM_VERSION_REGEXP = ".*[v]{1}\\d{1,2}\\.\\d{1,2}\\.\\d{1,3}.*";
+    private final static String EXPECTED_HOST = "examples-quarkus-helm.apps.ocp4-10.dynamic.quarkus";
 
     @Inject
     static QuarkusHelmClient helmClient;
@@ -23,11 +28,21 @@ public class QuarkusHelmClientIT {
     @Test
     public void verifyHelmInjection() {
         QuarkusHelmClient.Result helmCmdResult = helmClient.run("version");
-        Assertions.assertTrue(
+        assertTrue(
                 helmCmdResult.isSuccessful(),
                 String.format("Command %s fails", helmCmdResult.getCommandExecuted()));
-        Assertions.assertTrue(
+        assertTrue(
                 helmCmdResult.getOutput().matches(EXPECTED_HELM_VERSION_REGEXP),
                 "Unexpected helm version");
+    }
+
+    @Test
+    public void verifyChartValuesYamlContent() throws FileNotFoundException {
+        String chartName = "examples-quarkus-helm";
+        String chartFolderName = helmClient.getWorkingDirectory().getAbsolutePath() + "/helm/" + chartName;
+        Map<String, String> values = (Map<String, String>) helmClient.getChartValues(chartName, chartFolderName)
+                .get("examplesQuarkusHelm");
+        assertEquals(values.get("host"), EXPECTED_HOST, "Unexpected Chart values.yaml host");
+        assertFalse(values.get("image").isEmpty(), "Chart values.yaml host should not be empty");
     }
 }
