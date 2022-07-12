@@ -49,7 +49,7 @@
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
         <quarkus.platform.version>2.10.2.Final</quarkus.platform.version>
-        <exclude.tests.with.tags>quarkus-cli,quarkus-helm</exclude.tests.with.tags>
+        <exclude.quarkus-cli.tests.with.tags>quarkus-cli,quarkus-helm</exclude.quarkus-cli.tests.with.tags>
         <include.tests>**/*IT.java</include.tests>
         <exclude.openshift.tests>**/OpenShift*IT.java</exclude.openshift.tests>
         <exclude.kubernetes.tests>**/Kubernetes*IT.java</exclude.kubernetes.tests>
@@ -583,7 +583,6 @@
             <activation>
                 <property>
                     <name>run-helm-tests</name>
-                </property>
                 </property>
             </activation>
             <properties>
