@@ -33,6 +33,5 @@ public abstract class AbstractMysqlReusableInstance extends AbstractSqlDatabaseI
 
     private void setContainerPort() {
         containerPort = database.getURI().getPort();
-        ;
     }
 }

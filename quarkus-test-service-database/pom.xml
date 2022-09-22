@@ -11,7 +11,17 @@
     <dependencies>
         <dependency>
             <groupId>io.quarkus.qe</groupId>
+            <artifactId>quarkus-test-containers</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus.qe</groupId>
             <artifactId>quarkus-test-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus.qe</groupId>
+            <artifactId>quarkus-test-openshift</artifactId>
+            <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
